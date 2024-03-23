@@ -1,6 +1,7 @@
-from flask import Flask, jsonify
-from bs4 import BeautifulSoup
 import requests
+import json
+from flask import Flask, Response, jsonify
+from bs4 import BeautifulSoup
 from concurrent.futures import ThreadPoolExecutor
 
 
@@ -34,32 +35,32 @@ def scrape_sports_events(url):
                     'date': date.get_text().strip() if date else None,
                     'sport': sport.get_text() if sport else None
                 })
-                
-    return events_list
-                
-                
+    yield json.dumps(events_list).encode('utf-8')
+
+
 # GET /Events
 @app.route("/Events/", defaults={'weeks': 0})
 @app.route("/Events/<int:weeks>")
-def process_request(weeks):
-    events = []
-
-    if weeks == 0: # Base case
-        url = f'https://allsportdb.com/?week={weeks}'
-        events.extend(scrape_sports_events(url))
-    else:  
-        # Submit each call to a thread pool to speed up execution time
-        with ThreadPoolExecutor() as executor:
+def process_request(weeks):    
+    # Submit each call to a thread pool to speed up execution time
+    with ThreadPoolExecutor() as executor:
+        if weeks == 0: # Base case for unspecified amount of weeks (default to 1 week, the current one)
+            url = f'https://allsportdb.com/?week={weeks}'
+            futures = [executor.submit(scrape_sports_events, url)]
+        else:
             urls = [f'https://allsportdb.com/?week={week}' for week in range(weeks)]
             futures = [executor.submit(scrape_sports_events, url) for url in urls]
-            # Gather results from each thread after all threads are executed
-            for future in futures:
-                events.extend(future.result())
             
-    print(f"Number of Events: {len(events)}")
-    
-    return jsonify(events)
-    
+        # Yield results from each thread as they are available
+            # yields collection of lists, each list represents one page and contains JSON objects of event data
+        for future in futures:
+            yield from future.result()
+
+
+def generate_events(url):
+    for events in scrape_sports_events(url):
+        yield json.dumps(events).encode('utf-8')
+
 
 if __name__ == "__main__":
     app.run(debug=True)
