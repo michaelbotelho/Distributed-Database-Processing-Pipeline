@@ -13,12 +13,12 @@ def scrape_events():
     
     # Build a scraping model
     scraper = AutoScraper()
-    result = scraper.build(url, wanted_list)
+    result = scraper.build(url, ['Fencing World Cup - Women Epee', 'Fencing'])
 
     # Train model with similar results
-    result = scraper.get_result_similar("https://allsportdb.com/?week=1", grouped=True)
-    
+    result = scraper.get_result_similar("https://allsportdb.com/?week=0", grouped=True)
     return jsonify(result)
+    
     # Set aliases and save ruleset
     #scraper.set_rule_aliases({'rule_2eid': 'Date', 'rule_30oz': })
     

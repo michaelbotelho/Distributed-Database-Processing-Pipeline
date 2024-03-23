@@ -1,19 +1,18 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, jsonify
 from bs4 import BeautifulSoup
 import requests
+from concurrent.futures import ThreadPoolExecutor
+
 
 app = Flask(__name__)
 
-@app.route("/")
-def scrape_events():
-    # URL of the website to scrape
-    url = 'https://allsportdb.com/?week={0}'
-    
+
+def scrape_sports_events(url):
     # Send a GET request to the URL
     response = requests.get(url)
     
-    # Extract and Parse the HTML content of the page
-    events = []
+    # Extract and Parse the HTML content of the page if request successful
+    events_list = []
     if response.status_code == 200:
         soup = BeautifulSoup(response.text, 'html.parser')
         # Iterate through each row in table (event represented by a row)
@@ -25,18 +24,42 @@ def scrape_events():
                 sport = event_item.find('a', {'href': lambda x : x.startswith('/Sports/')})
                 country = event_item.find('meta', itemprop='addressCountry')
                 locality = event_item.find('meta', itemprop='addressLocality')
-                datetime = event_item.find_all('td')[-1]
-                events.append({
-                    'event_name': event_name.get_text(),
-                    'country': country.get('content'),
-                    'locality': locality.get('content'),
-                    'datatime': datetime.get_text().strip(),
-                    'sport': sport.get_text()
+                date = event_item.find_all('td')[-1]
+                
+                # Create JSON objects with scraped data and set default values in case attribute cant be found
+                events_list.append({
+                    'event_name': event_name.get_text() if event_name else None,
+                    'country': country.get('content') if country else None,
+                    'locality': locality.get('content') if locality else None,
+                    'date': date.get_text().strip() if date else None,
+                    'sport': sport.get_text() if sport else None
                 })
-    
-    # Render a template with the extracted data
-    return jsonify(events)
+                
+    return events_list
+                
+                
+# GET /Events
+@app.route("/Events/", defaults={'weeks': 0})
+@app.route("/Events/<int:weeks>")
+def process_request(weeks):
+    events = []
 
+    if weeks == 0: # Base case
+        url = f'https://allsportdb.com/?week={weeks}'
+        events.extend(scrape_sports_events(url))
+    else:  
+        # Submit each call to a thread pool to speed up execution time
+        with ThreadPoolExecutor() as executor:
+            urls = [f'https://allsportdb.com/?week={week}' for week in range(weeks)]
+            futures = [executor.submit(scrape_sports_events, url) for url in urls]
+            # Gather results from each thread after all threads are executed
+            for future in futures:
+                events.extend(future.result())
+            
+    print(f"Number of Events: {len(events)}")
+    
+    return jsonify(events)
+    
 
 if __name__ == "__main__":
     app.run(debug=True)
