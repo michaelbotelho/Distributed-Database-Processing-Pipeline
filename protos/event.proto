@@ -12,3 +12,7 @@ message EventResponse {
     string date = 4;
     string sport = 5;
 }
+
+service RoutingService {
+    rpc RequestEvents (EventRequest) returns (EventResponse);
+}
