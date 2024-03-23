@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+
+message EventRequest {
+    int64 weeks = 1;
+}
+
+message EventResponse {
+    string event_name = 1;
+    string country = 2;
+    string locality = 3;
+    string date = 4;
+    string sport = 5;
+}
