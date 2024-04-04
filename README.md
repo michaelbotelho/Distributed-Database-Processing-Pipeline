@@ -121,9 +121,9 @@ _For more examples, please refer to the [Documentation](https://example.com)_
 <!-- ROADMAP -->
 ## Roadmap
 
+- [ ] Create frontend client interface
 - [ ] Create backend service to process data
 - [ ] Create backend service to route and cache data
-- [ ] Create frontend client interface
 - [ ] Create frontend service to communicate between client and server
 
 See the [open issues](https://github.com/michaelbotelho/Distributed-Database-Processing-Pipeline/issues) for a full list of proposed features (and known issues).
