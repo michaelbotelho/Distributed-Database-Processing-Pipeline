@@ -31,18 +31,21 @@ def find_open_port(address, start_port, end_port):
 
 ''' Routing functions ''' 
 # GET /Events
-@app.route("/Events/")
+@app.route("/")
 def process_request():
     
     # Simulate a url query
     #with app.app_context():    
-    with app.test_request_context('/Events/?weeks=5'):
+    with app.test_request_context('/?weeks=2'):
         # Parse weeks argument (context issue when not enclosed in this with statement)
-        weeks = request.args.get('weeks')  
-        if not weeks:
-            weeks = 0
+        if request.args:
+            weeks = request.args.get('weeks')  
+            if not weeks:
+                weeks = 0
+            else:
+                weeks = int(weeks)
         else:
-            weeks = int(weeks)
+            weeks = 0
         
 
     def scrape_sports_events(url):

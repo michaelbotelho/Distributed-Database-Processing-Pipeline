@@ -1,4 +1,5 @@
 .categories-menu {
+    background-color: rgb(200, 223, 255);
     display: flex;
     flex-flow: column wrap;
     justify-content: flex-start;
@@ -6,10 +7,14 @@
     position: relative;
     padding: 1em;
     width: 100%;
+    border-radius: .5em;
+    border: 0px solid;
 }
 
 
 #dropdown-button {
+    background-color: rgb(67, 145, 255);
+    border-color: rgb(50, 134, 251);
     text-align: left;
     width: 100%;
     margin: .5em 0 .5em 0;

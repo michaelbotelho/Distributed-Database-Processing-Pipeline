@@ -1,18 +1,14 @@
-html, body, #root {
-  height: 100%;
-}
 
 main {
+  font-family: 'Roboto', serif;
   display: flex;
   flex-flow: row wrap;
   justify-content: flex-start;
   align-items: stretch;
-  min-height: 100%;
   padding: 10em;
 }
 
 #categories-menu {
-  background-color: rgb(210, 213, 255);
   width: 25%;
   margin: auto;
 }
@@ -24,6 +20,25 @@ main {
   text-align: left;
   padding: 1em;
   width: 70%;
-  margin: 1em;
-  border: 2px solid black;
+  margin: auto;
+  border: 2px solid lightgray;
+  border-radius: .5em;
+}
+
+@media only screen and (max-width: 1000px) {
+  main {
+    flex-direction: column;
+    padding: 0;
+  }
+
+  #categories-menu {
+    width: stretch;
+    margin: 1em;
+  }
+
+  #results-container {
+    width: auto;
+    margin: 1em;
+
+  }
 }

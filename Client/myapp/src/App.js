@@ -1,7 +1,14 @@
 import React from 'react';
-import './App.css'; // Your custom CSS file
+import './App.css'; 
 import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
-import CategoriesMenu from './CategoriesMenu'; // Import your CategoriesMenu component
+import CategoriesMenu from './CategoriesMenu'; 
+import Events from './Event'
+
+
+
+function PopulateResults({ events }) {
+  return <Event />
+}
 
 function App() {
   return (
@@ -10,10 +17,8 @@ function App() {
         <CategoriesMenu />
       </div>
       <div id="results-container">
-        <p>Results</p>
-        <p>Another</p>
-        <p>Grid Element</p>
-        <p>Anothersld</p>
+        <h3>Results</h3>
+        <PopulateResults />
       </div>
     </main>
   );
