@@ -1,0 +1,16 @@
+.categories-menu {
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: flex-start;
+    align-items: stretch;
+    position: relative;
+    padding: 1em;
+    width: 100%;
+}
+
+
+#dropdown-button {
+    text-align: left;
+    width: 100%;
+    margin: .5em 0 .5em 0;
+}

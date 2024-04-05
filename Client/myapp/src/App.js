@@ -1,98 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import './App.css'; // Your custom CSS file
+import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
+import CategoriesMenu from './CategoriesMenu'; // Import your CategoriesMenu component
 
-
-function FsiltersTable({ categories }) {
-  const rows = [];
-
-  categories.forEach(category => {
-    document.writeln(category);
-    
-    //rows.push(
-    //  <CategoryHeader header={entryHeader}/>
-    //);
-    //
-    //for (let index = 0; index < entryData.length; index++) {
-    //  const data = entryData[index];
-    //  rows.push(
-    //    <CategoryData data={data}/>
-    //  );
-    //}
-  });
-
+function App() {
   return (
-    <table>
-      <thead>
-        <tr>
-          <th>Categories</th>
-        </tr>
-      </thead>
-      <tbody>{rows}</tbody>
-    </table>
+    <main>
+      <div id="categories-menu">
+        <CategoriesMenu />
+      </div>
+      <div id="results-container">
+        <p>Results</p>
+        <p>Another</p>
+        <p>Grid Element</p>
+        <p>Anothersld</p>
+      </div>
+    </main>
   );
 }
 
-function CategoryHeaderRow( { header }) {
-  return(
-    <tr>
-      <th>{header}</th>
-    </tr>
-  );
-}
-
-function CategoryDataRow( { data }) {
-  return(
-    <tr>
-      <td>{data}</td>
-    </tr>
-  );
-}
-
-
-function FiltersTable({ categories }) {
-  const rows = [];
-
-  for (var category in categories) {
-    var categoryData = categories[category];
-    
-    rows.push(
-      <CategoryHeaderRow header={category} />
-    );
-
-      categoryData.forEach(element => {
-        rows.push(
-          <CategoryDataRow data={element}/>
-        );
-      })
-
-  }
-
-  return (
-    <div>
-      <table>
-        <thead>
-          <tr>
-            <th>Categories</th>
-          </tr>
-        </thead>
-        <tbody>{rows}</tbody>
-      </table>
-    </div>
-  );
-}
-
-
-export default function App() {
-  var sports = ["Soccer", "Football", "Baseball", "Basketball", "Hockey"];
-  var countries = ["Canada", "USA", "Germany", "China", "France", "Spain"];
-  const CATEGORIES = {
-    Sports: sports, 
-    Countries: countries
-  };
-
-  for (let index = 0; index < CATEGORIES.length; index++) {
-    const element = CATEGORIES[index];
-    
-  }
-  return <FiltersTable categories={CATEGORIES} />
-}
+export default App;
