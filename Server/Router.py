@@ -73,34 +73,67 @@ def scrape_sports_events(url):
     else:
         return None
 
-    
+def delete_all_keys():
+    keys = redis_client.keys("*")
+    print(f'Keys Before: {keys}')
+    for i in range(len(keys)):
+        redis_client.delete(keys[i])
+    print(f'Keys Left: {redis_client.keys("*")}')
+
+
 '''Application Routes'''
 # Receive a query
 @app.route('/', methods=['GET'])
 def receive_query():
     # Simulate client get request
-    with app.test_request_context('/?weeks=2&country=Mexico&sport=Hockey'):
+    with app.test_request_context('/?weeks=2&country=United States'):
         weeks = request.args.get('weeks')
         country = request.args.get('country')
         sport = request.args.get('sport')
         
         query = request.query_string
-        
+                
+    # Check if query exists in cache
+    if redis_client.exists(query.decode('utf-8')):
+        print(f'Exists: {query.decode('utf-8')}')
+        response = redis_client.hget(query.decode('utf-8'), 'events')
+        return jsonify(response)
     
-        
+    
     # Make a request to API service
     scraping_service_url = f'http://{HOST_ADDRESS}:{APPLICATION_PORT-1}/scrape'
     response = requests.get(scraping_service_url, params={'weeks': weeks})
 
+
     # Check if the response is successful
     if response.status_code == 200:
         try:
+            # Process data to match query
+            processed_response = []
+            for events_week in response.json():
+                for event in events_week:
+                    if country:
+                        if sport and event['country'] == country and event['sport'] == sport:
+                            # Add event if country and sport are given and both match
+                            processed_response.append(event)
+                        elif not sport and event['country'] == country:
+                            # Add event if sport doesn't exist but country does and matches
+                            processed_response.append(event)
+                    elif sport and event['sport'] == sport:
+                        # Add event if country doesn't exist but sport does and matches
+                        processed_response.append(event)
+                    else:
+                        # Return all results back to client if no query parameters given
+                        return jsonify(response.json())
+                           
+                
             # Cache query and response hset(hash, key, value)
-            redis_client.hset(query.decode('utf-8'), 'events', json.dumps(response.json()))
+            redis_client.hset(query.decode('utf-8'), 'events', json.dumps(processed_response))
+
             
             # Send response back to client
-            return jsonify(response.json())
-            return jsonify({'query': query.decode('utf-8'), 'data' : response.json()})
+            return jsonify(processed_response)
+        
         except ValueError as e:
             print(f"Error decoding JSON: {e}")
             return jsonify({'error': 'Invalid JSON format in response'})
@@ -139,13 +172,13 @@ if __name__ == '__main__':
     # Read the output of the Redis server process
     while True:
         output = process.stdout.readline().decode('utf-8')
-        short = re.search(r"\*:\d{4}", output)
-        long = re.search(r"port \d{4}", output)
-        if short:
-            REDIS_PORT = short.group(0).split(":")[1]
+        re1 = re.search(r"\*:\d{4}", output)
+        re2 = re.search(r"port \d{4}", output)
+        if re1:
+            REDIS_PORT = re1.group(0).split(":")[1]
             break
-        if long:
-            REDIS_PORT = long.group(0).split()[1]
+        if re2:
+            REDIS_PORT = re2.group(0).split()[1]
             break
         if not output:
             break
