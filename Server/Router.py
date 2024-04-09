@@ -132,7 +132,8 @@ def receive_query():
                         # Add event if country doesn't exist but sport does and matches
                         processed_response.append(event)
                     else:
-                        # Return all results back to client if no query parameters given
+                        # Cache query and Return all results back to client if no query parameters given
+                        redis_client.hset(query, 'events', json.dumps(response.json()))
                         return jsonify(response.json())
                            
                 
@@ -180,7 +181,7 @@ if __name__ == '__main__':
     
     # Run Redis server and find port number
     REDIS_PORT = find_open_port(HOST_ADDRESS, start_port=6379)
-    process = subprocess.Popen(f'../Redis-x64-3.0.504/redis-server.exe --port {REDIS_PORT}', stdout=subprocess.PIPE)
+    process = subprocess.Popen(f'Redis-x64-3.0.504/redis-server.exe --port {REDIS_PORT}', stdout=subprocess.PIPE)
     
     print(f"Redis port: {REDIS_PORT}")
         
