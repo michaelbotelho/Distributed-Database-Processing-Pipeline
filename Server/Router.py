@@ -1,4 +1,4 @@
-import os, socket, subprocess, time
+import os, socket, subprocess, time, re
 import redis
 import requests
 import json
@@ -99,7 +99,7 @@ def receive_query():
             redis_client.hset(query.decode('utf-8'), 'events', json.dumps(response.json()))
             
             # Send response back to client
-            return jsonify(response.json)
+            return jsonify(response.json())
             return jsonify({'query': query.decode('utf-8'), 'data' : response.json()})
         except ValueError as e:
             print(f"Error decoding JSON: {e}")
@@ -132,20 +132,24 @@ def collect_data():
 if __name__ == '__main__': 
     # Scan for open port to bind application to 
     APPLICATION_PORT = find_open_port(HOST_ADDRESS, start_port=5000, end_port=5004)
-    # Scan for open port to bind redis client to
-    REDIS_PORT = find_open_port(HOST_ADDRESS, start_port=6379)
+    # Run Redis server and find port number
+    REDIS_PORT = None
+    redis_server_path = "Redis-x64-3.0.504"
+    process = subprocess.Popen(f'"../{redis_server_path}/redis-server.exe"', stdout=subprocess.PIPE)
+    # Read the output of the Redis server process
+    while True:
+        output = process.stdout.readline().decode('utf-8')
+        string = re.search(r"\*:\d{4}", output)
+        if string:
+            REDIS_PORT = string.group(0).split(":")[1]
+            break
+        if not output:
+            break
+        
     # Bind application if port is available 
-    if APPLICATION_PORT is None: 
+    if APPLICATION_PORT is None or REDIS_PORT is None: 
         print("No open ports found in the specified range.") 
         exit(0) 
     else: 
-        redis_server_path = "Redis-x64-3.0.504"
-        process = subprocess.Popen(f'"../{redis_server_path}/redis-server.exe"', stdout=subprocess.PIPE)
-        # Read the output of the Redis server process
-        while True:
-            output = process.stdout.readline().decode('utf-8')
-            print(output)
-            if not output:
-                break
-        redis_client = redis.Redis(host=HOST_ADDRESS, port=6379, decode_responses=True)
+        redis_client = redis.Redis(host=HOST_ADDRESS, port=REDIS_PORT, decode_responses=True)
         app.run(debug=True, port=APPLICATION_PORT) # Weird bug where application binds to PORT and print returns PORT + 1
