@@ -2,11 +2,13 @@ import os, socket, subprocess, time, re
 import redis
 import requests
 import json
+from flask_cors import CORS
 from flask import Flask, request, jsonify 
 from bs4 import BeautifulSoup
 
 
 app = Flask(__name__)
+CORS(app) # Include necessary CORS headers in responses to allow requests from all origins
 HOST_ADDRESS = 'localhost'
 
 
@@ -82,22 +84,29 @@ def delete_all_keys():
 
 
 '''Application Routes'''
+# Return the status of the Flask API
+@app.route('/status')
+def get_status():
+    return jsonify({'status': 'running'})
+
+
 # Receive a query
 @app.route('/', methods=['GET'])
 def receive_query():
     # Simulate client get request
-    with app.test_request_context('/?weeks=2&country=United States'):
-        weeks = request.args.get('weeks')
-        country = request.args.get('country')
-        sport = request.args.get('sport')
-        
-        query = request.query_string
+    #with app.test_request_context('/?weeks=2&country=Canada'):
+    weeks = request.args.get('weeks')
+    country = request.args.get('country')
+    sport = request.args.get('sport')
+    
+    query = request.query_string.decode('utf-8')
+    if not query: query=""
                 
     # Check if query exists in cache
-    if redis_client.exists(query.decode('utf-8')):
-        print(f"Exists: {query.decode('utf-8')}")
-        response = redis_client.hget(query.decode('utf-8'), 'events')
-        return jsonify(response)
+    if redis_client.exists(query):
+        print(f"Exists: {query}")
+        response = redis_client.hget(query, 'events')
+        return response
     
     
     # Make a request to API service
@@ -128,7 +137,7 @@ def receive_query():
                            
                 
             # Cache query and response hset(hash, key, value)
-            redis_client.hset(query.decode('utf-8'), 'events', json.dumps(processed_response))
+            redis_client.hset(query, 'events', json.dumps(processed_response))
 
             
             # Send response back to client
@@ -165,23 +174,15 @@ def collect_data():
 if __name__ == '__main__': 
     # Scan for open port to bind application to 
     APPLICATION_PORT = find_open_port(HOST_ADDRESS, start_port=5000, end_port=5004)
+    
+    # Find and kill other running redis-servers
+    subprocess.run('taskkill /IM redis-server.exe /F', shell=True)
+    
     # Run Redis server and find port number
-    REDIS_PORT = None
-    redis_server_path = "Redis-x64-3.0.504"
-    process = subprocess.Popen(f'"../{redis_server_path}/redis-server.exe"', stdout=subprocess.PIPE)
-    # Read the output of the Redis server process
-    while True:
-        output = process.stdout.readline().decode('utf-8')
-        re1 = re.search(r"\*:\d{4}", output)
-        re2 = re.search(r"port \d{4}", output)
-        if re1:
-            REDIS_PORT = re1.group(0).split(":")[1]
-            break
-        if re2:
-            REDIS_PORT = re2.group(0).split()[1]
-            break
-        if not output:
-            break
+    REDIS_PORT = find_open_port(HOST_ADDRESS, start_port=6379)
+    process = subprocess.Popen(f'../Redis-x64-3.0.504/redis-server.exe --port {REDIS_PORT}', stdout=subprocess.PIPE)
+    
+    print(f"Redis port: {REDIS_PORT}")
         
     # Bind application if port is available 
     if APPLICATION_PORT is None or REDIS_PORT is None: 
