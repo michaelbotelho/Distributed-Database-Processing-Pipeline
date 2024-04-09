@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+
+message EventRequest { 
+    string query = 1;
+}
+
+message EventResponse {
+    string data = 1;
+}
+
+service RoutingService {
+    rpc RequestEvents (EventRequest) returns (EventResponse);
+}
