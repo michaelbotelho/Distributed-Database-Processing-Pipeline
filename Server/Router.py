@@ -139,9 +139,13 @@ if __name__ == '__main__':
     # Read the output of the Redis server process
     while True:
         output = process.stdout.readline().decode('utf-8')
-        string = re.search(r"\*:\d{4}", output)
-        if string:
-            REDIS_PORT = string.group(0).split(":")[1]
+        short = re.search(r"\*:\d{4}", output)
+        long = re.search(r"port \d{4}", output)
+        if short:
+            REDIS_PORT = short.group(0).split(":")[1]
+            break
+        if long:
+            REDIS_PORT = long.group(0).split()[1]
             break
         if not output:
             break
