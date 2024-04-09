@@ -1,8 +1,7 @@
-import socket 
-import requests
-import subprocess
-import time
+import os, socket, subprocess, time
 import redis
+import requests
+import json
 from flask import Flask, request, jsonify 
 from bs4 import BeautifulSoup
 
@@ -96,11 +95,11 @@ def receive_query():
     # Check if the response is successful
     if response.status_code == 200:
         try:
-            # Cache query and response
-            #redis_client.hset(query.decode('utf-8'), 'events', response.json())
+            # Cache query and response hset(hash, key, value)
+            redis_client.hset(query.decode('utf-8'), 'events', json.dumps(response.json()))
             
             # Send response back to client
-            # return jsonify(response.json)
+            return jsonify(response.json)
             return jsonify({'query': query.decode('utf-8'), 'data' : response.json()})
         except ValueError as e:
             print(f"Error decoding JSON: {e}")
@@ -140,4 +139,13 @@ if __name__ == '__main__':
         print("No open ports found in the specified range.") 
         exit(0) 
     else: 
+        redis_server_path = "Redis-x64-3.0.504"
+        process = subprocess.Popen(f'"../{redis_server_path}/redis-server.exe"', stdout=subprocess.PIPE)
+        # Read the output of the Redis server process
+        while True:
+            output = process.stdout.readline().decode('utf-8')
+            print(output)
+            if not output:
+                break
+        redis_client = redis.Redis(host=HOST_ADDRESS, port=6379, decode_responses=True)
         app.run(debug=True, port=APPLICATION_PORT) # Weird bug where application binds to PORT and print returns PORT + 1
