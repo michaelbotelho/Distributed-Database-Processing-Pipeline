@@ -95,7 +95,7 @@ def receive_query():
                 
     # Check if query exists in cache
     if redis_client.exists(query.decode('utf-8')):
-        print(f'Exists: {query.decode('utf-8')}')
+        print(f"Exists: {query.decode('utf-8')}")
         response = redis_client.hget(query.decode('utf-8'), 'events')
         return jsonify(response)
     
