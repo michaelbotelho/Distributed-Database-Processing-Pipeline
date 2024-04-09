@@ -1,5 +1,4 @@
 import requests
-import json
 import socket
 
 from flask import Flask, request, jsonify
