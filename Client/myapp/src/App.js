@@ -32,7 +32,7 @@ function App() {
   useEffect(() => {
     if (flaskPort) {
       // Example: Fetch data from Flask API
-      fetch(`http://localhost:${flaskPort}/?weeks=7`)
+      fetch(`http://localhost:${flaskPort}/?weeks=2`)
         .then((response) => response.json())
         .then((data) => {
           console.log('Data from Flask API:', data);
