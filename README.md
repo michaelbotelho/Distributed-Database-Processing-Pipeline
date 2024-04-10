@@ -24,9 +24,11 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
+  <!--
   <a href="https://github.com/michaelbotelho/Distributed-Database-Processing-Pipeline">
     <img src="images/logo.png" alt="Logo" width="80" height="80">
   </a>
+  -->
 
   <h2 align="center">Distributed-Database-Processing-Pipeline</h2>
 </div>
@@ -40,7 +42,7 @@
     <li>
       <a href="#about-the-project">About The Project</a>
       <ul>
-        <li><a href="#built-with">Built With</a></li>
+        <li><a href="#built-with">Tech Stack</a></li>
       </ul>
     </li>
     <li>
@@ -66,21 +68,27 @@
 
 [![Product Name Screen Shot][product-screenshot]](https://example.com)
 
-Initial idea is to build an API as a collection of microservices. The API will take sports event data, parse it based on a query, and cache the most frequently queried data.
+A distributed application designed to efficiently retrieve and process sports events data from various allsportdb.com. Leveraging a distributed architecture, web scraping techniques, and caching mechanisms, the system enables users to query sports events data with ease and reliability.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 
-### Built With
+### Tech Stack
 
-
+#### Tools:
 * [![Node][Node.js]][Node-url]
-* [![React][React.js]][React-url]
-* [![Flask][Flask.py]][Flask-url]
 * [![Redis][Redis]][Redis-url]
-* [![Google RPC][gRPC]][gRPC-url]
 
+#### Frameworks:
+* [![Flask][Flask.py]][Flask-url]
+* [![React][React.js]][React-url]
+
+#### Libraries:
+* BeautifulSoup (for web scraping)
+* Requests (for making HTTP requests)
+* Flask-CORS (for enabling CORS in Flask)
+* Redis-Py (Python client for Redis)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -89,12 +97,11 @@ Initial idea is to build an API as a collection of microservices. The API will t
 
 ## Getting Started
 
-
 ### Prerequisites
 
 - Node.js  
 - Python and Pip
-- 
+- ```requirements.txt```
 
 
 ### Installation
@@ -125,10 +132,10 @@ Initial idea is to build an API as a collection of microservices. The API will t
 <!-- ROADMAP -->
 ## Roadmap
 
-- [ ] Create frontend client interface
-- [ ] Create backend service to process data
-- [ ] Create backend service to route and cache data
-- [ ] Create frontend service to communicate between client and server
+- [X] Create frontend client interface
+- [X] Create backend service to process data
+- [X] Create backend service to route and cache data
+- [X] Create frontend service to communicate between client and server
 
 See the [open issues](https://github.com/michaelbotelho/Distributed-Database-Processing-Pipeline/issues) for a full list of proposed features (and known issues).
 
@@ -174,13 +181,13 @@ Project Link: [https://github.com/michaelbotelho/Distributed-Database-Processing
 
 
 
-<!-- ACKNOWLEDGMENTS -->
+<!-- ACKNOWLEDGMENTS 
 ## Acknowledgments
 
 Resources I found helpful during the development of this project:
 
 * [Img Shields](https://shields.io)
-
+-->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
