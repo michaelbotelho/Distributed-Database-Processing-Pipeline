@@ -139,13 +139,13 @@ def receive_query():
                 continue
             
     # Simulate client get request
-    with app.test_request_context('/?weeks=2&country=Canada'):
-        weeks = request.args.get('weeks')
-        country = request.args.get('country')
-        sport = request.args.get('sport')
-        
-        query = request.query_string.decode('utf-8')
-        if not query: query=""
+    #with app.test_request_context('/?weeks=2&country=Canada'):
+    weeks = request.args.get('weeks')
+    country = request.args.get('country')
+    sport = request.args.get('sport')
+    
+    query = request.query_string.decode('utf-8')
+    if not query: query=""
                 
     # Check if query exists in local cache
     if redis_client.exists(query):

@@ -35,7 +35,7 @@ function CategoryDropdown({ categoryTitle, categoryElements }) {
 }
 
 
-function CategoriesMenu({ sliderValue, onSliderChange, onSubmit }) {
+function CategoriesMenu({ onClick, sliderValue, onSliderChange, onSubmit }) {
     // These sections will eventually be replaced by dynamic information form cache service
     var sports = ["Soccer", "Football", "Baseball", "Basketball", "Hockey"];
     var countries = ["Canada", "USA", "Germany", "China", "France", "Spain"];
@@ -55,7 +55,7 @@ function CategoriesMenu({ sliderValue, onSliderChange, onSubmit }) {
     return (
         <div className="categories-menu">
             <Slider id="weeks-slider" value={String(sliderValue)} onChange={onSliderChange} />
-            <button onClick={onSubmit}>Search</button>
+            <button onClick={onClick}>Search</button>
             {sections}
         </div>
     );

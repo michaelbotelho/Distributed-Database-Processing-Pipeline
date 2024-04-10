@@ -10,7 +10,8 @@ import Slider from './Slider';
 
 function PopulateResults({ data }) {
   const events = [];
-  data.forEach(week => {
+  data && console.log(data[0]);
+  data && data.forEach(week => {
     week.forEach(sport_event => {
       events.push(
         <Event 
@@ -56,57 +57,62 @@ function App() {
     discoverFlaskPort();
   }, []);
 
-  // Once the Flask port is discovered, you can use it to make requests
-  useEffect(() => {
-    if (flaskPort) {
-      // Example: Fetch data from Flask API
-      fetch(`http://localhost:${flaskPort}/?weeks=2`)
-        .then((response) => response.json())
-        .then((data) => {
-          console.log('Data from Flask API:', data);
+
+  // useEffect(() => {
+  //   if (flaskPort) {
+  //     // Example: Fetch data from Flask API
+  //     fetch(`http://localhost:${flaskPort}/?weeks=2`)
+  //       .then((response) => response.json())
+  //       .then((data) => {
+  //         console.log('Data from Flask API:', data);
+  //       })
+  //       .catch((error) => {
+  //         console.error('Error fetching data from Flask API:', error.message);
+  //       });
+  //   }
+  // }, [flaskPort]);
+
+  const [responseData, setResponseData] = useState(null);
+  const fetchData = () => {
+    fetch(`http://localhost:${flaskPort}/?weeks=3`)
+        .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
         })
-        .catch((error) => {
-          console.error('Error fetching data from Flask API:', error.message);
-        });
-    }
-  }, [flaskPort]);
+        .then(data => {
+        console.log('Data received:', data);
+        setResponseData(data);
+        })
+        .catch(error => {
+        console.error('There was a problem with the fetch operation:', error);
+    }); 
+  };
 
-
-  const data = [[{ 
-    "country": "Canada", 
-    "date": "4 - 22 April 2024", 
-    "event_name": "World Women Chess Championship - Candidates Tournament", 
-    "locality": "Toronto", 
-    "sport": "Chess" 
-  }]];
-  return (
-    <main>
-      <div id="categories-menu">
-        <CategoriesMenu
-          sliderValue={sliderValue}
-          onSliderChange={handleSliderChange}
-          onSubmit={handleSubmit}
-        />
-      </div>
-      <div id="results-container">
-        <h3>Results</h3>
-        <PopulateResults data={[[{ 
-          "country": "Canada", 
-          "date": "4 - 22 April 2024", 
-          "event_name": "World Women Chess Championship - Candidates Tournament", 
-          "locality": "Toronto", 
-          "sport": "Chess" 
-        }], 
-        [{ 
-          "country": "Canada", 
-          "date": "4 - 22 April 2024", 
-          "event_name": "World Women Chess Championship - Candidates Tournament", 
-          "locality": "Toronto", 
-          "sport": "Ohio" 
-        }]]} />
-      </div>
-    </main>
-  );
+  if (flaskPort) {
+    return (
+      <main>
+        <div id="categories-menu">
+          <CategoriesMenu
+            onClick={fetchData}
+            sliderValue={sliderValue}
+            onSliderChange={handleSliderChange}
+            onSubmit={handleSubmit}
+          />
+        </div>
+        <div id="results-container">
+          <h3>Results</h3>
+          <PopulateResults data={responseData} />
+        </div>
+      </main>
+    );
+  }
+  else {
+    return (
+      <h3>No Server Found</h3>
+    );
+  }
 }
 
 
