@@ -1,9 +1,7 @@
 import socket, subprocess, time
 import signal, atexit
-import redis
-import redis.exceptions
-import requests
-import json
+import redis, redis.exceptions
+import requests, json
 from flask_cors import CORS
 from flask import Flask, request, jsonify 
 from bs4 import BeautifulSoup
@@ -99,14 +97,14 @@ def handle_termination_signal():
 
 
 '''Application Routes'''
-# Return the status of the Flask API
+# Return the status of the Flask API (acts as a ping for client)
 @app.route('/status')
 def get_status():
     return jsonify({'status': 'running'})
 
 
 # Receive a query
-@app.route('/', methods=['GET'])
+@app.route('/', methods=['GET', 'POST'])
 def receive_query():
     # Simulate client get request
     #with app.test_request_context('/?weeks=2&country=Canada'):
@@ -186,6 +184,8 @@ def collect_data():
 
         return jsonify(response)
     
+    
+
 
 if __name__ == '__main__': 
     with app.app_context():

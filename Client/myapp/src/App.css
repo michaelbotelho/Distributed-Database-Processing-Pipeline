@@ -8,6 +8,11 @@ main {
   padding: 10em;
 }
 
+#site-description {
+  font-family: 'JetBrains Mono', sans-serif;
+  text-align: center;
+}
+
 #categories-menu {
   width: 25%;
   margin: auto;
