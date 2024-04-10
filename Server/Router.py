@@ -100,18 +100,6 @@ def handle_termination_signal():
 '''
 
 
-@app.route('/start_task')
-def start_task():
-    def do_work(value):
-        # do something that takes a long time
-        import time
-        time.sleep(value)
-        print("done")
-
-    thread = Thread(target=do_work, kwargs={'value': request.args.get('value', 20)})
-    thread.start()
-    return 'started'
-
 '''Application Routes'''
 # Return the status of the Flask server (acts as ping for client)
 @app.route('/status')
