@@ -6,7 +6,7 @@ import Slider from './Slider';
 
 
 
-function CategoryDropdown({ categoryTitle, categoryElements }) {
+function CategoryDropdown({ categoryTitle, categoryElements}) {
     const [isHovered, setIsHovered] = useState(false);
 
     const handleHover = () => {
@@ -17,25 +17,23 @@ function CategoryDropdown({ categoryTitle, categoryElements }) {
 
     categoryElements.forEach(element => {
         elements.push(
-            <div id="dropdown-item" key={element}>
-                <input type="checkbox" name={categoryTitle} value={element}></input>
-                <label for={categoryTitle}>{element}</label><br></br>
-            </div>
-            //<Dropdown.Item id="dropdown-item" key={element} href={"#/" + categoryTitle + "/" + element}>{element}</Dropdown.Item>
+            <Dropdown.Item id="dropdown-item" key={element} href={"#/" + categoryTitle + "/" + element}>{element}</Dropdown.Item>
         );
     });
 
     return (
         <div onMouseEnter={handleHover} onMouseLeave={handleHover}>
             <DropdownButton id="dropdown-button" title={categoryTitle} show={isHovered}>
-                {elements}
+                {categoryElements.map(option => (
+                    <Dropdown.Item id="dropdown-item" key={option} value={option}>{option}</Dropdown.Item>
+                ))}
             </DropdownButton>
         </div>
     );
 }
 
 
-function CategoriesMenu({ onClick, sliderValue, onSliderChange, onSubmit }) {
+function CategoriesMenu({ sliderValue, onClickSearch, onSliderChange, onInputChange1, onInputChange2 }) {
     // These sections will eventually be replaced by dynamic information form cache service
     var sports = ["Soccer", "Football", "Baseball", "Basketball", "Hockey"];
     var countries = ["Canada", "USA", "Germany", "China", "France", "Spain"];
@@ -48,15 +46,22 @@ function CategoriesMenu({ onClick, sliderValue, onSliderChange, onSubmit }) {
 
     for (var category in CATEGORIES) {
         sections.push(
-            <CategoryDropdown key={category} categoryTitle={category} categoryElements={CATEGORIES[category]} />
+            <CategoryDropdown 
+                categoryTitle={category} 
+                categoryElements={CATEGORIES[category]}
+            />
         );
     }
 
     return (
+        // <div className="categories-menu">
+        //     <Slider sliderValue={sliderValue} onChange={onSliderChange} />
+        //     <button onClick={onClickSearch}>Search</button>
+        //     {sections}
+        // </div>
         <div className="categories-menu">
-            <Slider id="weeks-slider" value={String(sliderValue)} onChange={onSliderChange} />
-            <button onClick={onClick}>Search</button>
-            {sections}
+            <Slider id="weeks-slider" sliderValue={sliderValue} onChange={onSliderChange} />
+            <button onClick={onClickSearch}>Search</button>
         </div>
     );
 }

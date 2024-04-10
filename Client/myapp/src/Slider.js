@@ -1,18 +1,16 @@
 import React from 'react';
 
-function Slider({ value, onChange }) {
+function Slider({ sliderValue, onChange }) {
     return (
         <div>
-            {/* Render the slider input element */}
             <input
                 type="range"
                 min="1"
                 max="10"
-                value={value}
+                defaultValue={sliderValue}
                 onChange={onChange}
             />
-            {/* Display the current value of the slider */}
-            <p>Weeks: {String(value)}</p>
+            <p>Weeks: {sliderValue}</p>
         </div>
     );
 }

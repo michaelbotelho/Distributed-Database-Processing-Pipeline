@@ -4,7 +4,6 @@ import 'bootstrap/dist/css/bootstrap.min.css'; // Import Bootstrap CSS
 import CategoriesMenu from './CategoriesMenu';
 import Event from './Event'
 import discoverPort from './apiDiscovery';
-import Slider from './Slider';
 
 
 
@@ -34,15 +33,22 @@ function PopulateResults({ data }) {
 
 function App() {
   const [flaskPort, setFlaskPort] = useState(null);
+  const [responseData, setResponseData] = useState(null);
   const [sliderValue, setSliderValue] = useState(2);
+  const [inputValue1, setInputValue1] = useState('');
+  const [inputValue2, setInputValue2] = useState('');
 
-  const handleSliderChange = (value) => {
-    setSliderValue(value); // Update the slider value
-  };
 
-  const handleSubmit = () => {
-    console.log('Slider value:', sliderValue);
+  const handleSliderChange = (event) => {
+    setSliderValue(event.target.value);
   };
+  const handleInputChange1 = (event) => {
+    setInputValue1(event.target.value);
+  };
+  const handleInputChange2 = (event) => {
+    setInputValue2(event.target.value);
+  };
+  
 
   // When the component mounts, discover the Flask API port
   useEffect(() => {
@@ -57,24 +63,17 @@ function App() {
     discoverFlaskPort();
   }, []);
 
-
-  // useEffect(() => {
-  //   if (flaskPort) {
-  //     // Example: Fetch data from Flask API
-  //     fetch(`http://localhost:${flaskPort}/?weeks=2`)
-  //       .then((response) => response.json())
-  //       .then((data) => {
-  //         console.log('Data from Flask API:', data);
-  //       })
-  //       .catch((error) => {
-  //         console.error('Error fetching data from Flask API:', error.message);
-  //       });
-  //   }
-  // }, [flaskPort]);
-
-  const [responseData, setResponseData] = useState(null);
+  // Fetch query when button is clicked
   const fetchData = () => {
-    fetch(`http://localhost:${flaskPort}/?weeks=3`)
+    var url = `http://localhost:${flaskPort}/?weeks=${sliderValue}`;
+    if (inputValue1 != '') {
+      url += `&country=${inputValue1}`;
+    }
+    if (inputValue2 != '') {
+      url += `&sport=${inputValue2}`;
+    }
+    console.log(url);
+    fetch(url)
         .then(response => {
         if (!response.ok) {
             throw new Error('Network response was not ok');
@@ -84,6 +83,9 @@ function App() {
         .then(data => {
         console.log('Data received:', data);
         setResponseData(data);
+        console.log('Slider value:', sliderValue);
+        console.log('Country:', inputValue1);
+        console.log('Sport:', inputValue2);
         })
         .catch(error => {
         console.error('There was a problem with the fetch operation:', error);
@@ -95,11 +97,12 @@ function App() {
       <main>
         <div id="categories-menu">
           <CategoriesMenu
-            onClick={fetchData}
             sliderValue={sliderValue}
+            onClickSearch={fetchData}
             onSliderChange={handleSliderChange}
-            onSubmit={handleSubmit}
-          />
+            onInputChange1={handleInputChange1}
+            onInputChange2={handleInputChange2}
+            />
         </div>
         <div id="results-container">
           <h3>Results</h3>
