@@ -32,11 +32,9 @@ function CategoryDropdown({ categoryTitle, categoryElements }) {
 
 const CategoriesMenu = () => {
     // These sections will eventually be replaced by dynamic information form cache service
-    var weeks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     var sports = ["Soccer", "Football", "Baseball", "Basketball", "Hockey"];
     var countries = ["Canada", "USA", "Germany", "China", "France", "Spain"];
     const CATEGORIES = {
-        Weeks: weeks,
         Sports: sports,
         Countries: countries
     };

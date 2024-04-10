@@ -10,10 +10,10 @@ body {
 header {
   font-family: 'JetBrains Mono', serif;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
+  flex-direction: row;
+  justify-content: space-around;
   align-items: center;
-  padding: 1em;
+  padding: .5em;
   margin: 1em;
 }
 
@@ -21,4 +21,3 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
