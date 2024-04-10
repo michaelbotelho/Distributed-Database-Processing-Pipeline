@@ -1,9 +1,10 @@
 import socket, subprocess, time
-import signal, atexit
 import redis
 import redis.exceptions
 import requests
 import json
+from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 from flask_cors import CORS
 from flask import Flask, request, jsonify 
 from bs4 import BeautifulSoup
@@ -18,6 +19,7 @@ REDIS_PORT = None
 REDIS_PID = None
  
 
+'''Utility Functions'''
 def find_open_port(address, start_port, end_port=65534):
     """
     Scans a range of ports for an available port to bind the given address to.
@@ -88,6 +90,7 @@ def delete_all_keys():
         redis_client.delete(keys[i])
     print(f'Keys Left: {redis_client.keys("*")}')
 
+    
 ''' Not needed (redis server terminated automatically when debug=False in Flask app.run())
 @atexit.register
 def handle_termination_signal():
@@ -97,47 +100,69 @@ def handle_termination_signal():
 '''
 
 
+@app.route('/start_task')
+def start_task():
+    def do_work(value):
+        # do something that takes a long time
+        import time
+        time.sleep(value)
+        print("done")
+
+    thread = Thread(target=do_work, kwargs={'value': request.args.get('value', 20)})
+    thread.start()
+    return 'started'
 
 '''Application Routes'''
-# Return the status of the Flask API
+# Return the status of the Flask server (acts as ping for client)
 @app.route('/status')
 def get_status():
-    if request.method == 'GET':
-        # Example leader url (get from class), for now it just claims leader
-        leader_url = f"http://{HOST_ADDRESS}:{APPLICATION_PORT}/"
-        return jsonify(leader_url)
-    
     return jsonify({'status': 'running'})
 
 
-# Receive a query
-@app.route('/', methods=['GET'])
+# Receive and process a query
+@app.route('/', methods=['GET', 'POST'])
 def receive_query():
+    # Define function to send cache query requests
+    def cache_query_request(endpoint, query, data, retries=3):
+        for attempt in range(retries):
+            try:
+                response = requests.post(endpoint, json={'query': query, 'data': data})
+                if response.status_code == 200:
+                    print(f"Cached at {endpoint} {response.json()}")
+                    break
+                else:
+                    print(f"{attempt} attempt")
+                    time.sleep(0.2)
+            except requests.exceptions.ConnectionError:
+                print(f"Connection error at {endpoint}")
+                time.sleep(0.2)
+                continue
+            
     # Simulate client get request
-    #with app.test_request_context('/?weeks=2&country=Canada'):
-    weeks = request.args.get('weeks')
-    country = request.args.get('country')
-    sport = request.args.get('sport')
-    
-    query = request.query_string.decode('utf-8')
-    if not query: query=""
+    with app.test_request_context('/?weeks=2&country=Canada'):
+        weeks = request.args.get('weeks')
+        country = request.args.get('country')
+        sport = request.args.get('sport')
+        
+        query = request.query_string.decode('utf-8')
+        if not query: query=""
                 
-    # Check if query exists in cache
+    # Check if query exists in local cache
     if redis_client.exists(query):
         print(f"Exists: {query}")
         response = redis_client.hget(query, 'events')
-        return response
+        return response 
     
     
-    # Make a request to API service
+    # Make a request to API web scraping service
     scraping_service_url = f'http://{HOST_ADDRESS}:{APPLICATION_PORT}/scrape'
     response = requests.get(scraping_service_url, params={'weeks': weeks})
 
-
+    
     # Check if the response is successful
-    if response.status_code == 200:
+    if response.status_code == 200:            
+        # Process data to match query
         try:
-            # Process data to match query
             processed_response = []
             for events_week in response.json():
                 for event in events_week:
@@ -152,17 +177,32 @@ def receive_query():
                         # Add event if country doesn't exist but sport does and matches
                         processed_response.append(event)
                     else:
-                        # Cache query and Return all results back to client if no query parameters given
+                        # Cache query and all scraped results if no query parameters given
                         redis_client.hset(query, 'events', json.dumps(response.json()))
+                        
+                        # Send query and data to be cached on other nodes
+                        endpoints = []
+                        for port in range(5000, 5004 + 1):
+                            if port != APPLICATION_PORT: endpoints.append(f'http://{HOST_ADDRESS}:{port}/cache')
+                        threads = [Thread(target=cache_query_request, kwargs={'endpoint': endpoint, 'query': query, 'data': response.json()}) for endpoint in endpoints]
+                        [thread.start() for thread in threads]
+
+                        # Return all scraped results back to client
                         return jsonify(response.json())
-                           
-                
+                    
             # Cache query and response hset(hash, key, value)
             redis_client.hset(query, 'events', json.dumps(processed_response))
 
-            
+            # Send query and data to be cached on other nodes
+            endpoints = []
+            for port in range(5000, 5004 + 1):
+                if port != APPLICATION_PORT: endpoints.append(f'http://{HOST_ADDRESS}:{port}/cache')
+            threads = [Thread(target=cache_query_request, kwargs={'endpoint': endpoint, 'query': query, 'data': processed_response}) for endpoint in endpoints]
+            [thread.start() for thread in threads]
+                
             # Send response back to client
             return jsonify(processed_response)
+            
         
         except ValueError as e:
             print(f"Error decoding JSON: {e}")
@@ -172,7 +212,7 @@ def receive_query():
         return jsonify({'error': 'Failed to fetch data from API service'})
 
 
-# Collect data in range of weeks (default weeks=0)
+# Collect data in range weeks (default weeks=0)
 @app.route("/scrape", methods=['GET'])
 def collect_data():
     if request.method == 'GET':
@@ -190,7 +230,24 @@ def collect_data():
                     response.append(response_data)
 
         return jsonify(response)
+
     
+
+# Cache a query sent to another node to maintain eventual consistency
+@app.route("/cache", methods=['POST'])
+def cache_query_data():
+    if request.method == 'POST': 
+        # Get the JSON data sent in the request
+        request_data = request.json
+        
+        # Access the 'query' and 'data' fields from the JSON data
+        query = request_data.get('query')
+        data = request_data.get('data')
+        
+        redis_client.hset(query, 'events', json.dumps(data))
+        
+        return jsonify(True)
+        
 
 if __name__ == '__main__': 
     with app.app_context():
@@ -215,9 +272,7 @@ if __name__ == '__main__':
     print(f"Redis: PID({REDIS_PID}) : PORT({REDIS_PORT})")
 
     print(f"Flask: PORT({APPLICATION_PORT})")
-        
-        #signal.signal(signal.CTRL_C_EVENT, handle_termination_signal) # Register a signal handler for cleaning up the system when application terminates via CTRL+C
-    
+            
     
     # Bind application if port is available 
     if APPLICATION_PORT is None or REDIS_PORT is None: 
@@ -226,3 +281,4 @@ if __name__ == '__main__':
     
     else: 
         app.run(port=APPLICATION_PORT) 
+     
