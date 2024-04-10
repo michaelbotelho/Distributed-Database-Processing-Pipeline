@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './CategoriesMenu.css';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import Slider from './Slider';
 
 
 
@@ -16,7 +17,11 @@ function CategoryDropdown({ categoryTitle, categoryElements }) {
 
     categoryElements.forEach(element => {
         elements.push(
-            <Dropdown.Item id="dropdown-item" key={element} href={"#/" + categoryTitle + "/" + element}>{element}</Dropdown.Item>
+            <div id="dropdown-item" key={element}>
+                <input type="checkbox" name={categoryTitle} value={element}></input>
+                <label for={categoryTitle}>{element}</label><br></br>
+            </div>
+            //<Dropdown.Item id="dropdown-item" key={element} href={"#/" + categoryTitle + "/" + element}>{element}</Dropdown.Item>
         );
     });
 
@@ -30,7 +35,7 @@ function CategoryDropdown({ categoryTitle, categoryElements }) {
 }
 
 
-const CategoriesMenu = () => {
+function CategoriesMenu({ sliderValue, onSliderChange, onSubmit }) {
     // These sections will eventually be replaced by dynamic information form cache service
     var sports = ["Soccer", "Football", "Baseball", "Basketball", "Hockey"];
     var countries = ["Canada", "USA", "Germany", "China", "France", "Spain"];
@@ -49,6 +54,8 @@ const CategoriesMenu = () => {
 
     return (
         <div className="categories-menu">
+            <Slider id="weeks-slider" value={String(sliderValue)} onChange={onSliderChange} />
+            <button onClick={onSubmit}>Search</button>
             {sections}
         </div>
     );

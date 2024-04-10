@@ -1,0 +1,14 @@
+.event-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 1em;
+    margin: 1em;
+    background-color: rgb(223, 223, 223);
+    border-radius: .5em;
+}
+
+h6 {
+    font-weight: bolder;
+}

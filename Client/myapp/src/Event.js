@@ -1,10 +1,17 @@
 import React from "react";
+import './Event.css'
 
-const Event = ({ event }) => {
+function Event({ event_name, sport, country, locality, date }) {
     return (
         <div className="event-container">
-            <h5>World Cup</h5>
-            <p> </p>
+            <section>
+                <h6 id="event_name">{event_name}</h6>
+                <p id="sport">{sport}</p>
+            </section>
+            <section>
+                <p id="location">{locality} - {country}</p>
+                <p id="date">{date}</p>
+            </section>
         </div>
     );
 }
