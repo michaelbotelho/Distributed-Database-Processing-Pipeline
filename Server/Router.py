@@ -1,5 +1,7 @@
-import os, socket, subprocess, time, re
+import socket, subprocess, time
+import signal, atexit
 import redis
+import redis.exceptions
 import requests
 import json
 from flask_cors import CORS
@@ -7,10 +9,14 @@ from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
 
 
-app = Flask(__name__)
-CORS(app) # Include necessary CORS headers in responses to allow requests from all origins
-HOST_ADDRESS = 'localhost'
 
+app = Flask(__name__)
+CORS(app) # Include necessary CORS headers in responses to allow requests from all origins (React Client)
+HOST_ADDRESS = 'localhost'
+APPLICATION_PORT = None
+REDIS_PORT = None
+REDIS_PID = None
+ 
 
 def find_open_port(address, start_port, end_port=65534):
     """
@@ -82,6 +88,15 @@ def delete_all_keys():
         redis_client.delete(keys[i])
     print(f'Keys Left: {redis_client.keys("*")}')
 
+''' Not needed (redis server terminated automatically when debug=False in Flask app.run())
+@atexit.register
+def handle_termination_signal():
+    print("Handling Termination")
+    # Kill the running redis-server
+    subprocess.run(f'taskkill /PID {REDIS_PID} /F', shell=True)
+'''
+
+
 
 '''Application Routes'''
 # Return the status of the Flask API
@@ -110,7 +125,7 @@ def receive_query():
     
     
     # Make a request to API service
-    scraping_service_url = f'http://{HOST_ADDRESS}:{APPLICATION_PORT-1}/scrape'
+    scraping_service_url = f'http://{HOST_ADDRESS}:{APPLICATION_PORT}/scrape'
     response = requests.get(scraping_service_url, params={'weeks': weeks})
 
 
@@ -173,22 +188,36 @@ def collect_data():
     
 
 if __name__ == '__main__': 
-    # Scan for open port to bind application to 
-    APPLICATION_PORT = find_open_port(HOST_ADDRESS, start_port=5000, end_port=5004)
-    
-    # Find and kill other running redis-servers
-    subprocess.run('taskkill /IM redis-server.exe /F', shell=True)
-    
-    # Run Redis server and find port number
-    REDIS_PORT = find_open_port(HOST_ADDRESS, start_port=6379)
-    process = subprocess.Popen(f'Redis-x64-3.0.504/redis-server.exe --port {REDIS_PORT}', stdout=subprocess.PIPE)
-    
-    print(f"Redis port: {REDIS_PORT}")
+    with app.app_context():
+        # Find open port to run redis server on
+        REDIS_PORT = find_open_port(HOST_ADDRESS, start_port=6379)
+        # Find open port to run application on
+        APPLICATION_PORT = find_open_port(HOST_ADDRESS, start_port=5000, end_port=5004)
+
+        # Startup a redis server if not already running
+        redis_running = False
+        try:
+            redis_client = redis.Redis(host=HOST_ADDRESS, port=REDIS_PORT, decode_responses=True)
+        except redis.exceptions.ConnectionError:
+            pass
         
+        if not redis_running:   
+            redis_running = True
+            process = subprocess.Popen(f'Redis-x64-3.0.504/redis-server.exe --port {REDIS_PORT}', stdout=subprocess.PIPE)
+            REDIS_PID = process.pid # Assign process ID to stop redis server on application termination
+        
+        
+    print(f"Redis: PID({REDIS_PID}) : PORT({REDIS_PORT})")
+
+    print(f"Flask: PORT({APPLICATION_PORT})")
+        
+        #signal.signal(signal.CTRL_C_EVENT, handle_termination_signal) # Register a signal handler for cleaning up the system when application terminates via CTRL+C
+    
+    
     # Bind application if port is available 
     if APPLICATION_PORT is None or REDIS_PORT is None: 
-        print("No open ports found in the specified range.") 
+        print("Unable to bind service to a port.") 
         exit(0) 
+    
     else: 
-        redis_client = redis.Redis(host=HOST_ADDRESS, port=REDIS_PORT, decode_responses=True)
-        app.run(debug=True, port=APPLICATION_PORT) # Weird bug where application binds to PORT and print returns PORT + 1
+        app.run(port=APPLICATION_PORT) 
