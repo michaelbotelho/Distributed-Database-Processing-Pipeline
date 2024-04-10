@@ -86,36 +86,40 @@ Initial idea is to build an API as a collection of microservices. The API will t
 
 
 
-<!-- GETTING STARTED 
+
 ## Getting Started
 
-This is an example of how you may give instructions on setting up your project locally.
-To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-This is an example of how to list things you need to use the software and how to install them.
+- Node.js  
+- Python and Pip
+- 
 
 
 ### Installation
 
-_No installation instrucitons yet_
+1. Download the files
+2. Create a virtual environment ```python -m venv .venv```
+3. Activate environment ```.venv/Scripts/activate```
+4. Install the requirements ```pip install -r requirements.txt```
+5. Go to ```Client/myapp``` directory within the project folder
+6. Install Node into the directory ```npm install node```
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-
-<!-- USAGE EXAMPLES 
+ 
 ## Usage
 
-Use this space to show useful examples of how a project can be used. Additional screenshots, code examples and demos work well in this space. You may also link to more resources.
-
-_For more examples, please refer to the [Documentation](https://example.com)_
+1. From the ```Server/``` directory run ```python Router.py``` (Run up to 5 servers)
+2. In a separate shell, from the ```Client/myapp``` directory, run ```serve -s build``` (run ```npm install -g serve``` before if you get an error)
+3. Make requests from Client to Server and observe both Client and Server output
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
--->
+
 
 
 <!-- ROADMAP -->
