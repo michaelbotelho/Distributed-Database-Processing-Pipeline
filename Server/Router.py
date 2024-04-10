@@ -98,8 +98,13 @@ def handle_termination_signal():
 
 '''Application Routes'''
 # Return the status of the Flask API (acts as a ping for client)
-@app.route('/status')
+@app.route('/status', methods=['GET'])
 def get_status():
+    if request.method == 'GET':
+        # Example leader url (get from class), for now it just claims leader
+        leader_url = f"http://{HOST_ADDRESS}:{APPLICATION_PORT}/"
+        return jsonify(leader_url)
+    
     return jsonify({'status': 'running'})
 
 

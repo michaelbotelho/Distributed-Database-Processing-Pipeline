@@ -24,7 +24,16 @@ function PopulateResults({ data }) {
 }
 
 
-function App() {
+async function App() {
+  try {
+    const response = await fetch(`localhost:8000/proxy`);
+    if (response.ok) {
+      // Proxy is up, handle program logic
+    }
+  } catch (error) {
+    console.error("Error no proxy at localhost:8000/proxy");
+  }
+  
   // const [flaskPort, setFlaskPort] = useState(null);
 
   // // When the component mounts, discover the Flask API port
