@@ -1,3 +1,4 @@
 .*
 /Experimenting
 /Client/myapp/node_modules
+/flask
