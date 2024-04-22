@@ -187,9 +187,9 @@ Project Link: [https://github.com/michaelbotelho/Distributed-Database-Processing
 Resources I found helpful during the development of this project:
 
 * [Img Shields](https://shields.io)
--->
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+-->
 
 
 
