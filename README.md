@@ -106,12 +106,13 @@ A distributed application designed to efficiently retrieve and process sports ev
 
 ### Installation
 
-1. Download the files
-2. Create a virtual environment ```python -m venv .venv```
-3. Activate environment ```.venv/Scripts/activate```
+1. Download and extract the files
+2. Create a virtual environment within the project root directory ```python -m venv [venv name]```
+3. Activate environment ```[venv name]/Scripts/activate```
 4. Install the requirements ```pip install -r requirements.txt```
 5. Go to ```Client/myapp``` directory within the project folder
 6. Install Node into the directory ```npm install node```
+7. Run ```npm install serve``` to enable serving files locally
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -120,9 +121,10 @@ A distributed application designed to efficiently retrieve and process sports ev
  
 ## Usage
 
-1. From the ```Server/``` directory run ```python Router.py``` (Run up to 5 servers)
-2. In a separate shell, from the ```Client/myapp``` directory, run ```serve -s build``` (run ```npm install -g serve``` before if you get an error)
-3. Make requests from Client to Server and observe both Client and Server output
+1. In a shell, from within the project root directory, activate the virtual environment ```[venv name]/Scripts/activate```
+2. In a shell, from the ```Server/``` directory, run ```python Router.py``` (Run up to 5 servers on one machine)
+3. In a separate shell, from the ```Client/myapp``` directory, run ```serve -s build``` every time you want to startup the client
+4. Make requests from the Client to the Server and observe both Client and Server output
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
